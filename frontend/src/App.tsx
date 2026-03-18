@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import './App.css'
 interface Expense {
   id: number;
@@ -58,29 +57,25 @@ function App() {
       <h2>Total spend: {totalExpenses} PLN</h2>
 
       {expenses.length > 0 && (
-        <div style={{
-          display: 'flex', justifyContent: 'center',
-          marginBottom: '20px'
-        }}>
-          
-            <PieChart width={300} height={250}>
-              <Pie data={expenses}
-                dataKey='amount'
-                nameKey='name'
-                cx='50%'
-                cy='50%'
-                outerRadius={80}
-                fill='#8884d8'
-                label
-              >
-                {expenses.map((_, index) => (
-                  <Cell key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          
+        <div style={{ width: '100%', marginBottom: '30px' }}>
+          <div style={{display: 'flex', height: '25px', 
+            borderRadius: '12px', overflow: 'hidden', 
+            backgroundColor: '#333'}}>
+            {expenses.map((expense, index) => {
+              const percentage = (expense.amount / totalExpenses) * 100;
+              return (
+                <div key={expense.id}
+                  style={{width: `${percentage}%`, 
+                  backgroundColor: COLORS[index % COLORS.length],
+                  transition: 'width 0.5s ease-in-out' }} 
+                  title={`${expense.name}: ${expense.amount} PLN`} />
+              )
+            })}
+          </div>
+          <p style={{ textAlign: 'center', fontSize: '12px', 
+            color: '#888', marginTop: '10px' }}>
+            Proportion of expenses (tap colors to see details)
+          </p>
         </div>
       )}
 
