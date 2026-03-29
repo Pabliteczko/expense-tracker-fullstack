@@ -1,58 +1,72 @@
 import { useState, useEffect } from 'react'
 import './App.css'
+
+
+const BACKEND_URL = 'https://didactic-trout-ggrwrjpqvpx2vrqw-8000.app.github.dev';
+
 interface Expense {
   id: number;
   name: string;
   amount: number;
 }
 
-const COLORS = ['#0088FE', '#00C49F',
-  '#FFBB28', '#FF8042', '#9b59b6', '#e74c3c'];
-
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#9b59b6', '#e74c3c'];
 
 function App() {
-  const [expenses, setExpenses] =
-    useState<Expense[]>(() => {
-      const saved = localStorage.getItem('my-expenses');
-      if (saved) {
-        return JSON.parse(saved);
-      }
-      return [];
-
-    });
-
+  const [expenses, setExpenses] = useState<Expense[]>([]);
   const [expenseName, setExpenseName] = useState('')
   const [expenseAmount, setExpenseAmount] = useState('')
 
+  
   useEffect(() => {
-    localStorage.setItem('my-expenses', JSON.stringify(expenses))
-  }, [expenses]);
-
-  const totalExpenses = expenses.reduce((sum, currentItem) =>
-    sum + currentItem.amount, 0);
-
+    fetch(`${BACKEND_URL}/expenses`)
+    .then(response => response.json())
+    .then(data => setExpenses(data))
+    .catch(error => console.error('Błąd podczas pobierania danych:', error));
+  }, [])
+  
+  
   const addExpense = () => {
     if (expenseName === '' || expenseAmount === '') return;
 
-    const newExpense: Expense = {
+    const newExpense = {
       id: Date.now(),
       name: expenseName,
       amount: parseFloat(expenseAmount),
     };
 
-    setExpenses([...expenses, newExpense]);
-
-    setExpenseName('');
-    setExpenseAmount('');
+    fetch(`${BACKEND_URL}/expenses`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json' // Poprawione application
+      },
+      body: JSON.stringify(newExpense)
+    })
+    .then(response => response.json())
+    .then(savedExpense => {
+      setExpenses([...expenses, savedExpense]);
+      setExpenseName('');
+      setExpenseAmount('');
+    })
+    .catch(error => console.error('Błąd zapisu', error));
   }
 
-  const delateExpense = (idToRemove: number) => {
-    const updatedExpenses = expenses.filter((expense) => expense.id !== idToRemove);
-    setExpenses(updatedExpenses);
+  
+  const deleteExpense = (idToRemove: number) => {
+    fetch(`${BACKEND_URL}/expenses/${idToRemove}`, {
+      method: 'DELETE' // Poprawione DELETE
+    })
+    .then(() => {
+      const updatedExpenses = expenses.filter(expense => expense.id !== idToRemove);
+      setExpenses(updatedExpenses);
+    })
+    .catch(error => console.error('Błąd usuwania', error))
   }
+
+  const totalExpenses = expenses.reduce((total, expense) => total + expense.amount, 0);
 
   return (
-    <div className='app-conteiner'>
+    <div className='app-container'>
       <h1>Personal Expense Tracker 💰</h1>
       <h2>Total spend: {totalExpenses} PLN</h2>
 
@@ -79,7 +93,7 @@ function App() {
         </div>
       )}
 
-      <div className='form-conteiner'>
+      <div className='form-container'>
         <input
           type='text'
           placeholder='What did you buy?'
@@ -97,17 +111,12 @@ function App() {
         {expenses.map((expense) => (
           <li key={expense.id}>
             <span>{expense.name} - {expense.amount} PLN</span>
-            <button onClick={() => delateExpense(expense.id)}
-              style={{ backgroundColor: 'e74c3c', padding: '5px 10px', fontSize: '12px' }}>
+            <button onClick={() => deleteExpense(expense.id)}
+              style={{ backgroundColor: '#e74c3c', padding: '5px 10px', fontSize: '12px' }}>
               ❌</button>
           </li>
         ))}
       </ul>
-
-      <button onClick={() => setExpenses([])}
-        style={{ marginTop: '20px', backgroundColor: 'e74c3c' }
-        }>Clear All Expenses </button>
-
     </div>
   )
 }
