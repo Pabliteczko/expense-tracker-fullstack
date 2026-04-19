@@ -6,6 +6,7 @@ body{
   display: flex;
   justify-content: center;
   padding: 20px;
+  min-height: 100vh;
 }
 
 .app-container {
@@ -16,13 +17,35 @@ body{
   width: 100%;
   max-width: 500px;
   text-align: center;
+  margin: 50px auto;
+  color: white;
+  box-sizing: border-box;
 }
 
-.form-conteiner {
+.form-container {
   display: flex;
   flex-direction: column;
   gap: 15px;
   margin-bottom: 30px;
+}
+
+.app-container h1 {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px; 
+  text-align: center;
+  font-size: 2.2rem;
+  margin-bottom: 5px;
+  line-height: 1.2;
+}
+
+.app-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #a8a8a8;
 }
 
 input{
